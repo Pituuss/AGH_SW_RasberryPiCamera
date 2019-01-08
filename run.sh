@@ -1,5 +1,11 @@
 
 
 
-source ~/.profile
-workon cv 
+
+python3 Test.py 
+
+
+
+
+
+

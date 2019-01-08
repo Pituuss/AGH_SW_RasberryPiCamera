@@ -11,24 +11,27 @@ from multiprocessing import Queue
 import imutils
 import threading
 import time
+from threading import Thread
 
 tracker = None
 
 tracker = cv2.TrackerMOSSE_create()
 is_initialized = False
+sem = threading.Event()
+kill = True
 
-def classify_frame(inputQueue, outputQueue,rl, cnd):
-	while True:
-		'''rl.acquire()
-		while inputQueue.empty():
-			cnd.wait()
-		rl.release()'''
-		if not inputQueue.empty():
-			frame = inputQueue.get()
-			# frame = cv2.resize(frame, (300, 300))
-			face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-			faces = face_cascade.detectMultiScale(frame, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-			outputQueue.put(faces)
+def classify_frame(inputQueue, outputQueue,rl, sem,kill):
+	time.sleep(2.0)
+	t = threading.currentThread()
+	while getattr(t, "kill", True):
+		sem.wait()
+		#if not inputQueue.empty():
+		frame = inputQueue.get()
+		# frame = cv2.resize(frame, (300, 300))
+		face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+		faces = face_cascade.detectMultiScale(frame, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
+		outputQueue.put(faces)
+		sem.clear()
 
 inputQueue = Queue(1)
 outputQueue = Queue(1)
@@ -36,8 +39,8 @@ faces = None
 
 rl = threading.RLock()
 cnd = threading.Condition(rl)
-p = Process(target=classify_frame,args=(inputQueue,outputQueue,rl, cnd))
-p.daemon = True
+p = Thread(target=classify_frame,args=(inputQueue,outputQueue,rl, sem,kill))
+#p.daemon = True
 p.start()
 
 vs = VideoStream(src=0).start()
@@ -45,19 +48,17 @@ time.sleep(1.0)
 fps = None
 initBB = None
 
-insert_time = time.time() - 2.0
+insert_time = time.time() - 1.0
 
 while True:
 	frame = vs.read()
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	
-	if inputQueue.empty() and time.time() - insert_time > 2.0:
-		#print("insert")
-		'''rl.acquire()
-		cnd.notify()
-		rl.release()'''
+	#sem.acquire()
+	#print(inputQueue.empty())
+	if not sem.is_set() and time.time() - insert_time > 1.0:
 		insert_time = time.time()
 		inputQueue.put(gray)
+		sem.set()
 	
 	if not outputQueue.empty():
 		faces = outputQueue.get() 
@@ -92,11 +93,9 @@ while True:
 	key = cv2.waitKey(1) & 0xff
 	if key == ord('q'):
 		break
-		
-	if key == ord("s"):
-		initBB = cv2.selectROI("Frame", gray, fromCenter=False, showCrosshair=True)
-		fps = FPS().start()
-		print(initBB)
-		tracker.init(frame, initBB)
+
+p.kill = False
+sem.set()
+p.join()
 
 cv2.destroyAllWindows()
