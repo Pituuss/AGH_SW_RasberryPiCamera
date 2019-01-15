@@ -73,11 +73,8 @@ Przygotowanie klatki do obróbki:  \
 
 ```
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+gray = cv2.resize(gray, (300, 300))
 ```
-
-
-`gray = cv2.resize(gray, (300, 300)) \
- \
 `Dzięki temu uzyskamy mniejszy a zatem łatwiejszy do przetworzenia o uproszczonym formacie, dla klasyfikatora nie ma znaczenia czy obrazek jest w kolorze czy nie zadziała tak samo tylko że kolory to informacje a zatem kolorowe obrazki będą przetwarzane wolniej.
 
 Wysłanie klatki do procesu odpowiedzialnego za znalezienie twarzy. Będziemy to robić w pewnym odstępie czasu, ponieważ wykrywanie jest procesem bardzo kosztownym. \
