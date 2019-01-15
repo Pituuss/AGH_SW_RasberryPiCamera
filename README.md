@@ -6,11 +6,6 @@ Wymagania technologiczne:
 
 • biblioteka OpenCV.
 
-
-Repozytorium projektu:
-[https://github.com/Pituuss/AGH_SW_RaspberryPiCamera](https://github.com/Pituuss/AGH_SW_RaspberryPiCamera)
-
-
 ## Założenia projektu
 
 Stworzenie programu rozpoznającego twarz, który będzie ją śledził i nakładał na nią różne efekty. Program działa na płytce Raspberry Pi i wykorzystuje kamerę openCV, która jest bezpośrednio podłączona do niego przy użyciu kabla.
