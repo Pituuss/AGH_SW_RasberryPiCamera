@@ -1,16 +1,13 @@
-# AGH_SW_RaspberryPiCamera
-Project repository 
-
 # Zaawansowane przetwarzanie obrazu w czasie rzeczywistym 
 
 Wymagania technologiczne:
 
 • platforma sprzętowa Raspberry Pi z dołączony modułem kamery, 
 
-• biblioteka OpenCV. \
+• biblioteka OpenCV.
 
 
-Repozytorium projektu: \
+Repozytorium projektu:
 [https://github.com/Pituuss/AGH_SW_RaspberryPiCamera](https://github.com/Pituuss/AGH_SW_RaspberryPiCamera)
 
 
