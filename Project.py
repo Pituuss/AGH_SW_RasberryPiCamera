@@ -59,8 +59,6 @@ while True:
 			cv2.rectangle(frame, (max(x-offset,0),max(y-offset,0)), (x+w+offset, y+h+offset), (0, 255, 0), 2)
 			x0,x1,y0,y1 = (max(y-offset,0),y+h+offset,max(x-offset,0),x+w+offset)
 			edges = cv2.Canny(frame[x0:x1,y0:y1],50,50)
-			
-			#frame[y:y+h,x:x+w,2] = edges 
 
 	if faces is not None:
 		if len(faces) != 0:
@@ -68,7 +66,6 @@ while True:
 			tracker = cv2.TrackerMOSSE_create()
 			tracker.init(frame, initBB)
 			faces = None
-			#edges = None
 	
 	if edges is not None:
 		frame[x0:x1,y0:y1,0] = edges 
