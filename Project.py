@@ -16,12 +16,14 @@ outputQueue = Queue(1)
 faces = None
 vs = VideoStream(src=0).start()
 time.sleep(1.0)
-initBB = None
+initBB_1 = None
+initBB_2 = None
 feed_time = 1.0
 insert_time = time.time() - feed_time
-edges = None
 offset = 20
 tracker = None
+face_1 = None
+face_2 = None
 
 
 def classify_frame(input_queue, output_queue, sem, kill):
@@ -50,25 +52,37 @@ while True:
     if not outputQueue.empty():
         faces = outputQueue.get()
 
-    if initBB is not None:
-        (success, box) = tracker.update(frame)
+    if initBB_1 is not None:
+        (success, box) = tracker_1.update(frame)
         if success:
             (x, y, w, h) = [int(v) for v in box]
-            x0, x1, y0, y1 = (max(y - offset, 0), y + h + offset, max(x - offset, 0), x + w + offset)
-            edges = cv2.Canny(frame[x0:x1, y0:y1], 50, 50)
             cv2.rectangle(frame, (max(x - offset, 0), max(y - offset, 0)), (x + w + offset, y + h + offset),
                           (0, 255, 0), 2)
+            x01, x11, y01, y11 = (max(y - offset, 0), y + h + offset, max(x - offset, 0), x + w + offset)
+            face_1 = frame[x01:x11, y01:y11, :].copy()
+
+    if initBB_2 is not None:
+        (success, box) = tracker_2.update(frame)
+        if success:
+            (x, y, w, h) = [int(v) for v in box]
+            cv2.rectangle(frame, (max(x - offset, 0), max(y - offset, 0)), (x + w + offset, y + h + offset),
+                          (0, 255, 0), 2)
+            x02, x12, y02, y12 = (max(y - offset, 0), y + h + offset, max(x - offset, 0), x + w + offset)
+            face_2 = frame[x02:x12, y02:y12, :].copy()
 
     if faces is not None:
-        if len(faces) != 0:
-            initBB = tuple(faces[0])
-            tracker = cv2.TrackerBoosting_create()
-            tracker.init(frame, initBB)
-            faces = None
+        if len(faces) > 1:
+            initBB_1 = tuple(faces[0])
+            tracker_1 = cv2.TrackerMIL_create()
+            tracker_1.init(frame, initBB_1)
+            initBB_2 = tuple(faces[1])
+            tracker_2 = cv2.TrackerMIL_create()
+            tracker_2.init(frame, initBB_2)
 
-    if edges is not None:
-        frame[x0:x1, y0:y1, 2] = edges
-        frame[x0:x1, y0:y1, 0] = edges
+    if face_1 is not None and face_2 is not None:
+        print("swaping")
+        frame[x01:x11, y01:y11, :] = cv2.resize(face_2, (x11 - x01, y11 - y01))
+        frame[x02:x12, y02:y12, :] = cv2.resize(face_1, (x12 - x02, y12 - y02))
     cv2.imshow('frame', frame)
 
     key = cv2.waitKey(1) & 0xff
