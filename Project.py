@@ -73,10 +73,10 @@ while True:
     if faces is not None:
         if len(faces) > 1:
             initBB_1 = tuple(faces[0])
-            tracker_1 = cv2.TrackerMIL_create()
+            tracker_1 = cv2.TrackerKCF_create()
             tracker_1.init(frame, initBB_1)
             initBB_2 = tuple(faces[1])
-            tracker_2 = cv2.TrackerMIL_create()
+            tracker_2 = cv2.TrackerKCF_create()
             tracker_2.init(frame, initBB_2)
 
     if face_1 is not None and face_2 is not None:
