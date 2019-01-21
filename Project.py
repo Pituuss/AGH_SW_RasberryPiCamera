@@ -1,12 +1,13 @@
 #!/usr/bin/env/python
 # coding: utf-8
 
-import cv2
-from imutils.video import VideoStream
-from multiprocessing import Queue
 import threading
 import time
+from multiprocessing import Queue
 from threading import Thread
+
+import cv2
+from imutils.video import VideoStream
 
 is_initialized = False
 sem = threading.Event()
@@ -79,10 +80,17 @@ while True:
             tracker_2 = cv2.TrackerKCF_create()
             tracker_2.init(frame, initBB_2)
 
-    if face_1 is not None and face_2 is not None:
-        print("swaping")
-        frame[x01:x11, y01:y11, :] = cv2.resize(face_2, (x11 - x01, y11 - y01))
-        frame[x02:x12, y02:y12, :] = cv2.resize(face_1, (x12 - x02, y12 - y02))
+    try:
+        if face_1 is not None and face_2 is not None:
+            frame[x01:x11, y01:y11, :] = cv2.resize(face_2, (x11 - x01, y11 - y01), .5, .5,
+                                                    interpolation=cv2.INTER_CUBIC)
+            frame[x02:x12, y02:y12, :] = cv2.resize(face_1, (x12 - x02, y12 - y02), .5, .5,
+                                                    interpolation=cv2.INTER_CUBIC)
+
+            face_1 = face_2 = None
+    except:
+        print('error occurred')
+
     cv2.imshow('frame', frame)
 
     key = cv2.waitKey(1) & 0xff
